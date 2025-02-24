@@ -9,7 +9,11 @@ import (
 )
 
 func initMonoAPI(db *gorm.DB) handler.MonoAPI {
-	
+	wire.Build(db,
+		repository.ProviderMonoRepository,
+		service.ProviderMonoService,
+		handler.ProviderMonoAPI,
+	)
 
 	return handler.MonoAPI{}
 }
