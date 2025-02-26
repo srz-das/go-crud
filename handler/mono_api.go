@@ -1,26 +1,38 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo"
 	_ "github.com/labstack/echo"
 	"github.com/teten-nugraha/golang-crud/dto"
 	_ "github.com/teten-nugraha/golang-crud/dto"
 	"github.com/teten-nugraha/golang-crud/service"
-	"net/http"
 )
 
-type MonoAPI struct {
-	MonoService service.MonoService
+// Added MonoHandlerContract interface
+type MonoHandlerContract interface {
+	FindAll(e echo.Context) error
+	SaveOrUpdate(e echo.Context) error
+	FindByNIM(e echo.Context) error
+	DeleteMono(e echo.Context) error
 }
 
-func ProviderMonoAPI(k service.MonoService) MonoAPI {
+type MonoAPI struct {
+	MonoService service.MonoServiceContract
+}
+
+func ProviderMonoAPI(k service.MonoServiceContract) MonoAPI {
 	return MonoAPI{MonoService: k}
 }
 
 // implementasi
 func (m *MonoAPI) FindAll(e echo.Context) error {
 
-	Monos := m.MonoService.FindAll()
+	Monos, err  := m.MonoService.FindAll()
+	if err != nil {
+		return ErrorResponse(e, http.StatusInternalServerError, err.Error())
+	}
 
 	if len(Monos) == 0 {
 		return SuccessResponse(e, http.StatusNoContent, Monos)
@@ -32,11 +44,10 @@ func (m *MonoAPI) FindAll(e echo.Context) error {
 func (m *MonoAPI) SaveOrUpdate(e echo.Context) error {
 	var newDto dto.MonoDTO
 
-	newDto.Nim = e.FormValue("Nim")
-	newDto.Nama = e.FormValue("Nama")
-	newDto.Phone = e.FormValue("Phone")
-	newDto.Alamat = e.FormValue("Alamat")
-	newDto.Email = e.FormValue("Email")
+	// Binding request body to newDto
+	if err := e.Bind(&newDto); err != nil {
+		return ErrorResponse(e, http.StatusBadRequest, err.Error())
+	}
 
 	res, err := m.MonoService.SaveOrUpdate(newDto)
 	if err != nil {

@@ -7,10 +7,10 @@ import (
 	"github.com/teten-nugraha/golang-crud/mapper"
 	"github.com/teten-nugraha/golang-crud/repository"
 )
-
-type MonoRepositoryContract interface {
+// changed name from MonoRepositoryContract to MonoServiceContract
+type MonoServiceContract interface {
 	SaveOrUpdate(dto dto.MonoDTO) (dto.MonoDTO, error)
-	FindAll() [] dto.MonoDTO
+	FindAll() ([] dto.MonoDTO, error)
 	FindByNim(nim string) dto.MonoDTO
 	DeleteMono(id string) error
 }
@@ -19,8 +19,8 @@ type MonoService struct {
 	MonoRepository repository.MonoRepository
 }
 
-func ProviderMonoService(m repository.MonoRepository) MonoService {
-	return MonoService{
+func ProviderMonoService(m repository.MonoRepository) MonoServiceContract {
+	return &MonoService{
 		MonoRepository: m,
 	}
 }
@@ -35,11 +35,14 @@ func (m *MonoService) SaveOrUpdate(dto dto.MonoDTO) (dto.MonoDTO, error) {
 	return mapper.ToMonoDto(Mono), err
 }
 
-func (m *MonoService) FindAll() [] dto.MonoDTO {
+func (m *MonoService) FindAll() ([]dto.MonoDTO, error) {
 
-	datas := m.MonoRepository.FindAll()
+	datas, err := m.MonoRepository.FindAll()
+	if err != nil {
+		return nil, err
+	}
 
-	return mapper.ToMonoDtoList(datas)
+	return mapper.ToMonoDtoList(datas), nil
 }
 
 func (m *MonoService) FindByNim(nim string) dto.MonoDTO {
@@ -50,13 +53,16 @@ func (m *MonoService) FindByNim(nim string) dto.MonoDTO {
 
 func (m *MonoService) DeleteMono(id string) error {
 
-	Mono := m.MonoRepository.FindByID(id)
-
-	if(Mono == (domain.Mono{})) {
-		return errors.New("Mono Tidak ada")
+	Mono, err := m.MonoRepository.FindByID(id)
+	if err != nil {
+		return err
 	}
 
-	err := m.MonoRepository.DeleteMono(Mono)
+	if(Mono == (domain.Mono{})) {
+		return errors.New("mono tidak ada")
+	}
+
+	err = m.MonoRepository.DeleteMono(Mono)
 	if err != nil {
 		return err
 	}

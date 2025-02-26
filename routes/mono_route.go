@@ -12,5 +12,6 @@ func MonoRoute(routes *echo.Echo, api handler.MonoAPI) {
 		mhs.GET("/list", api.FindAll)
 		mhs.POST("/save", api.SaveOrUpdate)
 		mhs.GET("/findByNIM/:nim", api.FindByNIM)
+		mhs.DELETE("/remove/:id", api.DeleteMono)
 	}
 }

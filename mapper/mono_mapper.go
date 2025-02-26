@@ -8,6 +8,7 @@ import (
 // From DTO to Domain
 func ToMonoDomain(dto dto.MonoDTO) domain.Mono {
 	return domain.Mono{
+		ID: dto.ID,
 		Nim: dto.Nim,
 		Nama: dto.Nama,
 		Phone: dto.Phone,
@@ -29,6 +30,7 @@ func ToMonoDomainList(dtos []dto.MonoDTO) []domain.Mono {
 // From DTO to Domain
 func ToMonoDto(Mono domain.Mono) dto.MonoDTO {
 	return dto.MonoDTO{
+		ID: Mono.ID,
 		Nim: Mono.Nim,
 		Nama: Mono.Nama,
 		Phone: Mono.Phone,
@@ -37,11 +39,11 @@ func ToMonoDto(Mono domain.Mono) dto.MonoDTO {
 	}
 }
 
-func ToMonoDtoList(Monos []domain.Mono) []dto.MonoDTO {
+func ToMonoDtoList(Monos []*domain.Mono) []dto.MonoDTO {
 	dtos := make([]dto.MonoDTO, len(Monos))
 
 	for i, itm := range Monos {
-		dtos[i] = ToMonoDto(itm)
+		dtos[i] = ToMonoDto(*itm)
 	}
 
 	return dtos
